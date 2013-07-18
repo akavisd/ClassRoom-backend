@@ -1,5 +1,7 @@
 //#!/usr/bin/env node
 
+
+
 var util	= require('util');
 var http	= require('http');
 var fs		= require('fs');
@@ -9,9 +11,13 @@ var sys		= require("sys");
 var stream	= require('stream');
 
 var multipart = require("./node_modules/multipart");
+var searchEngine = require("./search.js");
 
 var storage = require("./storage");
 var uploader = require("./uploader");
+
+var test = require("./test");
+
 
 function escapeHtml(value) {
   return value.toString().
@@ -41,6 +47,9 @@ HttpServer.prototype.start = function(port) {
   this.port = port;
   this.server.listen(port);
   util.puts('Http Server running at ' + port + '/');
+  
+  
+	test.execute();
 };
 
 
@@ -172,8 +181,20 @@ Servlet.prototype.handleRequest = function(req, res, context) {
 		return self.sendForbidden_(req, res, path);
 	}
 	var action = req.url.pathname.replace('//','/').split('/')[1];
+	if (action==="test"){
+		test.execute(req, res);
+		
+		res.writeHead(200, self._getCommonHeaders(req,{'Content-Type': 'text/html'}));
+   		res.end();
+   		return;
+		
+	} 
 	
-	if (action==="metadata"){
+	
+	
+	if (action==="search"){
+		return self.search(req, res);
+	} else if (action==="metadata"){
 		return self.sendMetadata(req, res);
 	} else if (action==="upload"){
 		return self.uploadEpub(req, res);
@@ -232,10 +253,27 @@ Servlet.prototype.uploadEpub = function(req, res) {
 }
 
 
+Servlet.prototype.search = function(req, res) {
+	sys.log("search");
+	var self = this;
+	
+	var _searchdComplete = function (data) {
+		sys.log("Search complete");
+		var strData = JSON.stringify(data);
+		res.writeHeader(200, self._getCommonHeaders(req, {"Content-Type":  Servlet.MimeMap['json']}));
+		res.write(strData);
+		res.end();
+	}
+	
+	searchEngine.search(req.url.query['word'], test.indexDef, _searchdComplete);
+}
+
+
+
 Servlet.prototype._getCommonHeaders = function(req, headers){
 	headers = headers || {};
 	var enableDomain = req.headers["origin"];
-	headers["Access-Control-Allow-Origin"] = enableDomain;
+	headers["Access-Control-Allow-Origin"] = "*";//enableDomain;
 	return headers;	
 }
 
@@ -379,6 +417,10 @@ Servlet.prototype.writeDirectoryIndex_ = function(req, res, path, files) {
   res.write('</ol>');
   res.end();
 };
+
+
+		
+
 
 exports.HttpServer = HttpServer;
 exports.Servlet = Servlet;

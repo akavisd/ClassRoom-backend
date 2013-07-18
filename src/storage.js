@@ -41,11 +41,16 @@ function Storage() {
 
 
 	this.save = function (){
-        var fileStream = fs.createWriteStream(path);
         var str = JSON.stringify(self.getData());
+      
+      /*
+        var fileStream = fs.createWriteStream(path);
         fileStream.write(str);
         fileStream.end();
         fileStream.close();
+        */
+        
+        fs.writeFileSync(path, str);
         console.log("storage save: ", str);
 	}
 	
@@ -82,9 +87,12 @@ function Storage() {
 
 
 
-exports.instance =  new Storage();
+module.exports =  new Storage();
+
+/*
 exports.getData = exports.instance.getData;
 exports.setData = exports.instance.setData;
 
 exports.getItem = exports.instance.getItem;
 exports.removeItem = exports.instance.removeItem;
+*/

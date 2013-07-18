@@ -352,5 +352,5 @@ function Parser(){
 }
 
 
-exports.Parser  = Parser;
+module.exports = new Parser();
 

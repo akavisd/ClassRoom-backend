@@ -1,12 +1,11 @@
 //#!/usr/bin/env node
 
+
 var util	= require('util');
 var http	= require('http');
 var fs		= require('fs');
 var url		= require('url');
 var sys		= require("sys");
-
-
 
 
 function escapeHtml(value) {

@@ -10,7 +10,7 @@ var stream	= require('stream');
 
 var storage = require("./storage");
 var multipart = require("./node_modules/multipart");
-var parser = new require('./ebook-parser');
+var parser = require('./ebook-parser');
 
 
 
@@ -22,7 +22,7 @@ function Uploader(){
 	
 	function unpack(srcFileName, unpackComplete){
 
-      	var pars = new parser.Parser();
+      	var pars = parser;
       	pars.checkFile(srcFileName);
 	
 
@@ -78,7 +78,7 @@ function Uploader(){
 		var isEmpty = true;
 
 		    req.setEncoding("binary");
-		    parser = multipart.parser();
+		    parser = multipart.parser();  
 		    parser.headers = req.headers;
 
 		    parser.onPartBegin = function(part) {
@@ -93,13 +93,13 @@ function Uploader(){
 				 	sys.log("Writing chunk");
 					isEmpty = fileStream.write(chunk, "binary");
 				};
-		
+	/*	
 				fileStream.addListener("drain", function() {
 					sys.log("fileStream drain");
 		            //req.resume();
 		            
 		        });
-
+*/
 				fileStream.addListener("drain", function() {
 					sys.log("fileStream drain");
 					isEmpty = true;
@@ -141,5 +141,4 @@ function Uploader(){
 	}
 }
 
-exports.instance  = new Uploader();
-exports.upload = exports.instance.upload;
+module.exports = new Uploader();
